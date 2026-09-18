@@ -88,6 +88,18 @@ public class DriverService {
     }
 
     @Transactional
+    public DriverResponse updateGps(Long id, UpdateGpsRequest request) {
+        Driver driver = driverRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Driver not found: " + id));
+        driver.setLatitude(request.getLatitude());
+        driver.setLongitude(request.getLongitude());
+        driver.setLocationUpdatedAt(java.time.LocalDateTime.now());
+        driver = driverRepository.save(driver);
+        log.info("Driver {} GPS updated: {}, {}", id, request.getLatitude(), request.getLongitude());
+        return toResponse(driver);
+    }
+
+    @Transactional
     public void delete(Long id) {
         if (!driverRepository.existsById(id)) {
             throw new EntityNotFoundException("Driver not found: " + id);
@@ -103,6 +115,9 @@ public class DriverService {
                 .phone(driver.getPhone())
                 .licenseNumber(driver.getLicenseNumber())
                 .currentLocation(driver.getCurrentLocation())
+                .latitude(driver.getLatitude())
+                .longitude(driver.getLongitude())
+                .locationUpdatedAt(driver.getLocationUpdatedAt())
                 .status(driver.getStatus())
                 .createdAt(driver.getCreatedAt())
                 .build();

@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Shipments from './pages/Shipments'
 import ShipmentDetail from './pages/ShipmentDetail'
 import Drivers from './pages/Drivers'
+import DriverLocation from './pages/DriverLocation'
 import Customers from './pages/Customers'
 import Users from './pages/Users'
 import Messages from './pages/Messages'
@@ -26,6 +27,7 @@ function App() {
         <Route path="/shipments" element={<Shipments />} />
         <Route path="/shipments/:id" element={<ShipmentDetail />} />
         <Route path="/drivers" element={<Drivers />} />
+        <Route path="/my-location" element={<DriverLocation />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/messages" element={<Messages />} />
         <Route
