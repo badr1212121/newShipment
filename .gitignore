@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+frontend/dist/
+target/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Environment / secrets
+.env
+.env.local
+*.log
+# Local Spring profile with real credentials (keep the .example committed)
+application-local.properties
+**/application-local.properties
