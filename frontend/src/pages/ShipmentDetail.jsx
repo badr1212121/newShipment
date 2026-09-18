@@ -86,6 +86,7 @@ export default function ShipmentDetail() {
   const [updateLocation, setUpdateLocation] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [mapMarkers, setMapMarkers] = useState([])
+  const [driverGps, setDriverGps] = useState(null)
   const { toast } = useToast()
 
   const fetchShipment = useCallback(() => {
@@ -135,7 +136,34 @@ export default function ShipmentDetail() {
     loadData()
   }, [id, loadData])
 
-  // Geocode for tracking map
+  // Poll the assigned driver's live GPS every 5s
+  useEffect(() => {
+    if (!shipment?.driverId) {
+      setDriverGps(null)
+      return
+    }
+    let cancelled = false
+    const poll = () => {
+      axiosInstance
+        .get(`/drivers/${shipment.driverId}`)
+        .then((r) => {
+          if (cancelled) return
+          const d = r.data
+          if (d?.latitude != null && d?.longitude != null) {
+            setDriverGps({ lat: d.latitude, lng: d.longitude, at: d.locationUpdatedAt })
+          }
+        })
+        .catch(() => {})
+    }
+    poll()
+    const interval = setInterval(poll, 5000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [shipment?.driverId])
+
+  // Build tracking-map markers (driver GPS wins over geocoded text location)
   useEffect(() => {
     if (!shipment) {
       setMapMarkers([])
@@ -152,13 +180,10 @@ export default function ShipmentDetail() {
       promises.push(geocode(shipment.destination))
       labels.push(`Destination: ${shipment.destination}`)
     }
-    if (currentAddr) {
+    // Only geocode the text location if we don't have live GPS coordinates
+    if (!driverGps && currentAddr) {
       promises.push(geocode(currentAddr))
       labels.push(`Current: ${currentAddr}`)
-    }
-    if (promises.length === 0) {
-      setMapMarkers([])
-      return
     }
     let cancelled = false
     Promise.all(promises).then((results) => {
@@ -166,10 +191,13 @@ export default function ShipmentDetail() {
       const markers = results
         .map((c, i) => (c ? { ...c, label: labels[i] } : null))
         .filter(Boolean)
+      if (driverGps) {
+        markers.push({ lat: driverGps.lat, lng: driverGps.lng, label: 'Driver (live GPS)' })
+      }
       setMapMarkers(markers)
     })
     return () => { cancelled = true }
-  }, [shipment?.origin, shipment?.destination, shipment?.currentLocation, driverDetail?.currentLocation])
+  }, [shipment?.origin, shipment?.destination, shipment?.currentLocation, driverDetail?.currentLocation, driverGps])
 
   const handleAssignDriver = async (e) => {
     e.preventDefault()

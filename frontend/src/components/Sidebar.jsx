@@ -7,6 +7,7 @@ import {
   Users,
   UserCog,
   MessageCircle,
+  MapPin,
   X,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
@@ -20,6 +21,7 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'CUSTOMER', 'DRIVER'] },
   { to: '/shipments', label: 'Shipments', icon: Package, roles: ['ADMIN', 'CUSTOMER', 'DRIVER'] },
   { to: '/drivers', label: 'Drivers', icon: Truck, roles: ['ADMIN'] },
+  { to: '/my-location', label: 'My Location', icon: MapPin, roles: ['DRIVER'] },
   { to: '/customers', label: 'Customers', icon: Users, roles: ['ADMIN'] },
   { to: '/messages', label: 'Messages', icon: MessageCircle, roles: ['ADMIN', 'CUSTOMER', 'DRIVER'], showUnreadBadge: true },
   { to: '/users', label: 'Users', icon: UserCog, roles: ['ADMIN'] },

@@ -62,6 +62,15 @@ public class DriverController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}/gps")
+    public ResponseEntity<DriverResponse> updateDriverGps(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateGpsRequest request
+    ) {
+        DriverResponse response = driverService.updateGps(id, request);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDriver(@PathVariable Long id) {

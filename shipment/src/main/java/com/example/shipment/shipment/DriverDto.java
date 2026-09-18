@@ -55,6 +55,18 @@ public class DriverDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class UpdateGpsRequest {
+        @NotNull(message = "Latitude is required")
+        private Double latitude;
+
+        @NotNull(message = "Longitude is required")
+        private Double longitude;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class DriverResponse {
         private Long id;
         private Long userId;
@@ -62,6 +74,9 @@ public class DriverDto {
         private String phone;
         private String licenseNumber;
         private String currentLocation;
+        private Double latitude;
+        private Double longitude;
+        private LocalDateTime locationUpdatedAt;
         private DriverStatus status;
         private LocalDateTime createdAt;
     }
