@@ -20,3 +20,6 @@ build/
 # Local Spring profile with real credentials (keep the .example committed)
 application-local.properties
 **/application-local.properties
+
+# Personal study notes — local only, never committed
+INTERVIEW_NOTES.md
