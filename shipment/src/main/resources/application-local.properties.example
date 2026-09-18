@@ -1,0 +1,7 @@
+# Copy this file to application-local.properties and fill in your local values.
+# application-local.properties is gitignored so your credentials never get committed.
+# Run with the "local" profile active:
+#   ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+spring.datasource.username=root
+spring.datasource.password=YOUR_MYSQL_PASSWORD
+spring.jpa.show-sql=true
