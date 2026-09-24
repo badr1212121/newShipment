@@ -23,11 +23,25 @@ public class ShipmentController {
     private final ShipmentServices shipmentServices;
     private final ShipmentRepository shipmentRepository;
     private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
 
     @PostMapping
     public ResponseEntity<?> createShipment(@Valid @RequestBody ShipmentDto.CreateShipmentRequest request) {
-        var response = shipmentServices.createShipment(request);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isCustomer = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"));
 
+        // A customer creating a shipment gets it auto-linked to their own profile.
+        if (isCustomer) {
+            User currentUser = userRepository.findByUsername(auth.getName())
+                    .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("User not found"));
+            Customer customer = customerRepository.findByUser_Id(currentUser.getId())
+                    .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(
+                            "No customer profile linked to your account"));
+            request.setCustomerId(customer.getId());
+        }
+
+        var response = shipmentServices.createShipment(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -51,11 +65,15 @@ public class ShipmentController {
 
         List<ShipmentDto.ShipmentResponse> response;
         if (isCustomer) {
+            // Customers see all of their own shipments (so they can pay the unpaid ones).
             response = shipmentServices.findByCustomerUserId(currentUser.getId());
         } else if (isDriver) {
             response = shipmentServices.findByDriverUserId(currentUser.getId());
         } else {
-            response = shipmentServices.getAllShipments(customerId, status);
+            // Admins only see PAID shipments — an unpaid order isn't a real order yet.
+            response = shipmentServices.getAllShipments(customerId, status).stream()
+                    .filter(ShipmentDto.ShipmentResponse::isPaid)
+                    .toList();
         }
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

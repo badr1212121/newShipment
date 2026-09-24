@@ -10,6 +10,7 @@ import {
   CreditCard,
 } from 'lucide-react'
 import axiosInstance from '../api/axiosInstance'
+import { useAuth } from '../auth/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 import TrackingMap from '../components/TrackingMap'
 import { Button } from '@/components/ui/button'
@@ -90,6 +91,7 @@ export default function ShipmentDetail() {
   const [mapMarkers, setMapMarkers] = useState([])
   const [driverGps, setDriverGps] = useState(null)
   const { toast } = useToast()
+  const { isCustomer, isAdmin, isDriver } = useAuth()
 
   const fetchShipment = useCallback(() => {
     return axiosInstance.get(`/shipments/id/${id}`).then((res) => res.data)
@@ -306,24 +308,36 @@ export default function ShipmentDetail() {
           <p className="text-muted-foreground text-sm">Shipment details, packages, and tracking</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => { setAssignOpen(true); setAssignDriverId(shipment.driverId ? String(shipment.driverId) : '') }}>
-            <Truck className="h-4 w-4 mr-2" />
-            Assign driver
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => { setUpdateStatusOpen(true); setUpdateStatus(shipment.status); setUpdateLocation(shipment.currentLocation || '') }}>
-            <Pencil className="h-4 w-4 mr-2" />
-            Update status
-          </Button>
+          {/* Only admins assign drivers */}
+          {isAdmin && (
+            <Button variant="outline" size="sm" onClick={() => { setAssignOpen(true); setAssignDriverId(shipment.driverId ? String(shipment.driverId) : '') }}>
+              <Truck className="h-4 w-4 mr-2" />
+              Assign driver
+            </Button>
+          )}
+          {/* Admins and drivers update status; customers cannot */}
+          {(isAdmin || isDriver) && (
+            <Button variant="outline" size="sm" onClick={() => { setUpdateStatusOpen(true); setUpdateStatus(shipment.status); setUpdateLocation(shipment.currentLocation || '') }}>
+              <Pencil className="h-4 w-4 mr-2" />
+              Update status
+            </Button>
+          )}
           {shipment.paid ? (
             <span className="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 text-sm font-medium text-green-700">
               <CreditCard className="h-4 w-4 mr-2" />
               Paid
             </span>
-          ) : (
+          ) : isCustomer ? (
+            // Only the customer pays for their shipment
             <Button size="sm" onClick={handlePay} disabled={paying}>
               {paying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CreditCard className="h-4 w-4 mr-2" />}
               Pay
             </Button>
+          ) : (
+            <span className="inline-flex items-center rounded-md bg-amber-100 px-2.5 py-1 text-sm font-medium text-amber-700">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Unpaid
+            </span>
           )}
         </div>
       </div>
