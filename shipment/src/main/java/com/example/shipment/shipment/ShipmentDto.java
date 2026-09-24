@@ -52,6 +52,9 @@ public class ShipmentDto {
         private Long customerId;
         private Long driverId;
         private LocalDateTime assignedAt;
+        private Long amount;
+        private boolean paid;
+        private LocalDateTime paidAt;
     }
 
     @Builder

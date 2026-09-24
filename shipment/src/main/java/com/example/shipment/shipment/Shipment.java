@@ -54,6 +54,18 @@ public class Shipment {
     @Column(nullable = false)
     private ShipmentStatus status;
 
+    // --- Payment (Stripe) ---
+    /** Amount to charge, in the smallest currency unit (e.g. cents). */
+    @Column(name = "amount")
+    private Long amount;
+
+    @Column(name = "paid", nullable = false)
+    @Builder.Default
+    private boolean paid = false;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 

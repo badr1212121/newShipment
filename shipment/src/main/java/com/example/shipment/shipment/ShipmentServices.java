@@ -91,6 +91,9 @@ public class ShipmentServices {
             .customerId(shipment.getCustomer() != null ? shipment.getCustomer().getId() : null)
             .driverId(shipment.getDriver() != null ? shipment.getDriver().getId() : null)
             .assignedAt(shipment.getAssignedAt())
+            .amount(shipment.getAmount())
+            .paid(shipment.isPaid())
+            .paidAt(shipment.getPaidAt())
             .build();
     }
 

@@ -10,6 +10,7 @@ import DriverLocation from './pages/DriverLocation'
 import Customers from './pages/Customers'
 import Users from './pages/Users'
 import Messages from './pages/Messages'
+import PaymentResult from './pages/PaymentResult'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -30,6 +31,8 @@ function App() {
         <Route path="/my-location" element={<DriverLocation />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/payment/success" element={<PaymentResult success />} />
+        <Route path="/payment/cancel" element={<PaymentResult success={false} />} />
         <Route
           path="/users"
           element={
