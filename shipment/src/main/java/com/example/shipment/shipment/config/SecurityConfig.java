@@ -39,6 +39,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Stripe calls the webhook server-to-server with no JWT — must be public.
+                        // It's secured instead by verifying Stripe's signature.
+                        .requestMatchers("/api/payments/webhook").permitAll()
                         .requestMatchers("/api/messages/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/shipments").hasRole("ADMIN")
                         .anyRequest().authenticated())

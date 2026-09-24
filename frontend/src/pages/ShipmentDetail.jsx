@@ -7,6 +7,7 @@ import {
   Package,
   MapPin,
   ListOrdered,
+  CreditCard,
 } from 'lucide-react'
 import axiosInstance from '../api/axiosInstance'
 import StatusBadge from '../components/StatusBadge'
@@ -85,6 +86,7 @@ export default function ShipmentDetail() {
   const [updateStatus, setUpdateStatus] = useState('')
   const [updateLocation, setUpdateLocation] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [paying, setPaying] = useState(false)
   const [mapMarkers, setMapMarkers] = useState([])
   const [driverGps, setDriverGps] = useState(null)
   const { toast } = useToast()
@@ -236,6 +238,23 @@ export default function ShipmentDetail() {
     }
   }
 
+  const handlePay = async () => {
+    setPaying(true)
+    try {
+      // Ask the backend to create a Stripe Checkout session, then send the
+      // browser to Stripe's hosted payment page.
+      const { data } = await axiosInstance.post(`/payments/checkout/${id}`)
+      if (data?.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('No checkout URL returned')
+      }
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Payment error', description: err.response?.data?.message || 'Could not start payment' })
+      setPaying(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-6 max-w-6xl mx-auto">
@@ -295,6 +314,17 @@ export default function ShipmentDetail() {
             <Pencil className="h-4 w-4 mr-2" />
             Update status
           </Button>
+          {shipment.paid ? (
+            <span className="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 text-sm font-medium text-green-700">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Paid
+            </span>
+          ) : (
+            <Button size="sm" onClick={handlePay} disabled={paying}>
+              {paying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CreditCard className="h-4 w-4 mr-2" />}
+              Pay
+            </Button>
+          )}
         </div>
       </div>
 
