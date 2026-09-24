@@ -90,6 +90,7 @@ export default function Shipments() {
   const { toast } = useToast()
   const { user } = useAuth()
   const isAdmin = user?.role === 'ADMIN'
+  const isCustomer = user?.role === 'CUSTOMER'
 
   const fetchShipments = useCallback((params = {}) => {
     const query = new URLSearchParams()
@@ -321,7 +322,7 @@ export default function Shipments() {
           <h1 className="text-2xl font-bold tracking-tight">Shipments</h1>
           <p className="text-muted-foreground text-sm">Manage all shipments</p>
         </div>
-        {isAdmin && (
+        {(isAdmin || isCustomer) && (
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -365,6 +366,8 @@ export default function Shipments() {
                   placeholder="Date or text"
                 />
               </div>
+              {/* Admins can assign a customer; a customer's shipment auto-links to them */}
+              {isAdmin && (
               <div className="space-y-2">
                 <Label>Customer (optional)</Label>
                 <Select value={createCustomerId || 'none'} onValueChange={(v) => setCreateCustomerId(v === 'none' ? '' : v)}>
@@ -379,6 +382,7 @@ export default function Shipments() {
                   </SelectContent>
                 </Select>
               </div>
+              )}
               <div className="border-t pt-4 space-y-3">
                 <p className="text-sm font-medium text-muted-foreground">Package (optional)</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -622,6 +626,9 @@ export default function Shipments() {
                               </form>
                             </DialogContent>
                           </Dialog>
+                          {/* Only allow assigning a customer when none is set yet
+                              (a customer's own shipment already belongs to them) */}
+                          {!s.customerId && (
                           <Dialog open={assignCustomerShipment?.id === s.id} onOpenChange={(open) => !open && setAssignCustomerShipment(null)}>
                             <Button
                               variant="ghost"
@@ -663,6 +670,7 @@ export default function Shipments() {
                               </form>
                             </DialogContent>
                           </Dialog>
+                          )}
                           <AlertDialog open={deleteShipment?.id === s.id} onOpenChange={(open) => !open && setDeleteShipment(null)}>
                             <Button
                               variant="ghost"

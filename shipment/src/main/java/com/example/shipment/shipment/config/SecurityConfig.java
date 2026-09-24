@@ -43,7 +43,7 @@ public class SecurityConfig {
                         // It's secured instead by verifying Stripe's signature.
                         .requestMatchers("/api/payments/webhook").permitAll()
                         .requestMatchers("/api/messages/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/shipments").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/shipments").hasAnyRole("ADMIN", "CUSTOMER")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
