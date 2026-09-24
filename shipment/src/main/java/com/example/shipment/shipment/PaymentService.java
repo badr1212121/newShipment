@@ -4,7 +4,6 @@ import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +28,9 @@ public class PaymentService {
     // Default amount (in cents) if a shipment has none set yet: $50.00
     private static final long DEFAULT_AMOUNT_CENTS = 5000L;
 
-    // Runs once at startup: tell the Stripe SDK which secret key to use.
-    @PostConstruct
-    public void init() {
+    // Set the Stripe API key right before a call (instead of at startup),
+    // so the app can start in tests/CI where no key is configured.
+    private void useStripeKey() {
         Stripe.apiKey = stripeSecretKey;
     }
 
@@ -40,6 +39,7 @@ public class PaymentService {
      * the frontend should redirect the customer to.
      */
     public String createCheckoutSession(Long shipmentId) throws StripeException {
+        useStripeKey();
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Shipment not found"));
 
@@ -88,6 +88,7 @@ public class PaymentService {
      */
     @Transactional
     public boolean confirmPayment(Long shipmentId, String sessionId) throws StripeException {
+        useStripeKey();
         Session session = Session.retrieve(sessionId);
         // Stripe says "paid" only if the payment actually went through.
         boolean isPaid = "paid".equals(session.getPaymentStatus());
