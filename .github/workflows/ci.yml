@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+# Least privilege: CI only needs to read the code
+permissions:
+  contents: read
+
 jobs:
   backend:
     name: Backend build
@@ -16,6 +20,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Full history so SonarCloud can assign issues to the right commits
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -24,8 +31,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and run tests with Maven
-        run: ./mvnw -B package
+      - name: Build, test, and run SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=badr1212121
+          -Dsonar.projectKey=badr1212121_newShipment
 
   frontend:
     name: Frontend build

@@ -6,9 +6,10 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# --- Run stage: serve the static build with nginx ---
-FROM nginx:alpine
+# --- Run stage: serve the static build with a non-root nginx ---
+# nginx-unprivileged runs as a non-root user and listens on 8080 (security best practice)
+FROM nginxinc/nginx-unprivileged:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
