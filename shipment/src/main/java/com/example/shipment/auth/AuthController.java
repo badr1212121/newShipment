@@ -32,7 +32,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        log.info("POST /api/auth/login reached for email={}", request.getEmail());
+        // Don't log the email (PII); a plain hit log is enough.
+        log.info("POST /api/auth/login reached");
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
