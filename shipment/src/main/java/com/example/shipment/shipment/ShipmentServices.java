@@ -1,5 +1,7 @@
 package com.example.shipment.shipment;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,16 @@ public class ShipmentServices {
 
     public List<ShipmentDto.ShipmentResponse> getAllShipments() {
         return getAllShipments(null, null);
+    }
+
+    /**
+     * Paginated + sorted list of PAID shipments (for admins).
+     * Spring turns the Pageable into SQL LIMIT/OFFSET + ORDER BY.
+     * Page.map keeps the pagination metadata while converting entities to DTOs.
+     */
+    public Page<ShipmentDto.ShipmentResponse> getPaidShipmentsPaged(Pageable pageable) {
+        return shipmentRepository.findByPaidTrue(pageable)
+                .map(this::mapToResponse);
     }
 
     public List<ShipmentDto.ShipmentResponse> findByCustomerUserId(Long userId) {

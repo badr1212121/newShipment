@@ -1,5 +1,7 @@
 package com.example.shipment.shipment;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +12,9 @@ import java.util.List;
 
 @Repository
 public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
+
+    // Paginated: only paid shipments (used by the admin paged endpoint)
+    Page<Shipment> findByPaidTrue(Pageable pageable);
 
     @Query("SELECT s FROM Shipment s WHERE s.customer.user.id = :userId")
     List<Shipment> findByCustomerUserId(@Param("userId") Long userId);
