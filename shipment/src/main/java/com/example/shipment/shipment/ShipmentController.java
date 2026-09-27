@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 @RestController
 @RequestMapping("/api/shipments")
 @AllArgsConstructor
@@ -76,6 +80,17 @@ public class ShipmentController {
                     .toList();
         }
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    /**
+     * Paginated + sorted list of paid shipments.
+     * Example: GET /api/shipments/paged?page=0&size=20&sort=createdAt,desc
+     * Spring builds the Pageable from the query params automatically.
+     */
+    @GetMapping("/paged")
+    public ResponseEntity<Page<ShipmentDto.ShipmentResponse>> getShipmentsPaged(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(shipmentServices.getPaidShipmentsPaged(pageable));
     }
 
     @GetMapping("/id/{id}")
